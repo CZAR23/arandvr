@@ -3,79 +3,144 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>My GitHub Pages AR/VR Model</title>
-    <meta name="description" content="An A-Frame AR/VR model viewer hosted on GitHub Pages.">
+    <title>My Android AR Model Viewer</title>
+    <meta name="description" content="An A-Frame WebXR AR model viewer for Android phones.">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1, maximum-scale=1">
 
+    <!-- A-Frame Library: The core framework for WebXR -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; }
-        /* Optional: Basic styling for an instruction overlay */
+        /* Basic styling to ensure the scene fills the screen and instructions are visible */
+        body {
+            margin: 0;
+            overflow: hidden; /* Prevent scrolling */
+            font-family: 'Inter', sans-serif; /* Use Inter font */
+        }
+        /* Styling for the instruction overlay */
         #instructions {
             position: fixed;
-            bottom: 10px;
-            width: 100%;
+            bottom: 20px; /* Slightly higher from the bottom */
+            width: 90%; /* Take up most of the width */
+            left: 50%;
+            transform: translateX(-50%);
             text-align: center;
             color: white;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 10px;
-            font-family: sans-serif;
+            background-color: rgba(0, 0, 0, 0.7); /* Slightly darker, more opaque background */
+            padding: 15px; /* More padding */
+            border-radius: 10px; /* Rounded corners */
+            font-size: 16px;
             z-index: 100;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+        }
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 600px) {
+            #instructions {
+                font-size: 14px;
+                padding: 12px;
+            }
         }
     </style>
 </head>
 <body>
+    <!--
+        A-Frame Scene:
+        - embedded: Makes the scene fit within the HTML document.
+        - vr-mode-ui="enabled: true": Enables the default VR/AR UI buttons.
+        - renderer: Configures the rendering engine for better visual quality.
+            - antialias: true: Smooths jagged edges.
+            - toneMapping:ACESFilmic: Improves color and light representation.
+            - colorManagement: true: Ensures consistent color display.
+        - ar-mode-ui: This is automatically handled by A-Frame's WebXR component
+                      when 'vr-mode-ui' is enabled and an AR-compatible device is detected.
+                      A button to "Enter AR" will appear.
+    -->
     <a-scene embedded vr-mode-ui="enabled: true" renderer="antialias: true; toneMapping:ACESFilmic; colorManagement: true;">
 
+        <!-- Asset Management: Define and load your 3D model -->
         <a-assets>
-            <a-asset-item id="myModel" src="Inclinometer.glb"></a-asset-item>
-            </a-assets>
+            <!--
+                IMPORTANT: Replace 'your_model.glb' with the EXACT filename of your 3D model.
+                Since you confirmed it's in the same folder as index.html, no subfolder path is needed.
+                Example: If your file is named 'robot.glb', change src="your_model.glb" to src="robot.glb".
+            -->
+            <a-asset-item id="myModel" src="your_model.glb"></a-asset-item>
+        </a-assets>
 
+        <!--
+            Your 3D Model Entity:
+            - gltf-model: Links this entity to the loaded GLB model asset.
+            - position: Initial position in the 3D scene (X Y Z coordinates).
+                        For AR, this initial position often doesn't matter much as the user will place it.
+                        However, it's good to have a default for desktop viewing.
+            - scale: Adjusts the size of your model. 1 1 1 is default size.
+                     If your model appears too large or too small, adjust these values.
+                     e.g., scale="0.1 0.1 0.1" for 1/10th size.
+            - rotation: Initial rotation around X, Y, Z axes (in degrees).
+        -->
         <a-entity
             gltf-model="#myModel"
-            position="0 1.6 -3"  scale="1 1 1"       rotation="0 0 0">
+            position="0 0 -3"  <!-- Placed 3 meters in front of the camera, at ground level -->
+            scale="1 1 1"      <!-- Adjust scale as needed for your model's size -->
+            rotation="0 0 0">
         </a-entity>
 
-        <a-camera position="0 1.6 0"> <a-cursor></a-cursor> </a-camera>
+        <!--
+            Camera:
+            - This is the user's viewpoint.
+            - The default A-Frame camera handles ARCore's camera feed when in AR mode.
+        -->
+        <a-camera position="0 0 0">
+            <!-- A-Frame cursor for basic interaction (e.g., clicking on objects) -->
+            <a-cursor></a-cursor>
+        </a-camera>
 
+        <!--
+            Basic Lighting for the scene:
+            - Ambient light: Provides uniform light from all directions.
+            - Directional light: Simulates a light source like the sun.
+        -->
         <a-light type="ambient" color="#BBB"></a-light>
         <a-light type="directional" position="1 1 1" intensity="0.5"></a-light>
         <a-light type="directional" position="-1 1 -1" intensity="0.5"></a-light>
 
+        <!--
+            Ground Plane and Sky (Optional for AR, but good for initial 3D view):
+            - In AR mode, these will typically be hidden as the real world camera feed takes over.
+        -->
         <a-plane position="0 0 -4" rotation="-90 0 0" width="10" height="10" color="#7BC8A4"></a-plane>
         <a-sky color="#ECECEC"></a-sky>
 
-        </a-scene>
+    </a-scene>
 
+    <!-- Instructions overlay for the user -->
     <div id="instructions">
-        Tap the VR icon to enter VR mode. On AR-compatible devices, tap the AR button.
+        Tap the AR button (often a square icon with a dot) to place the model in your space.
         <br>
-        Use your phone's motion to look around.
+        Move your phone to detect surfaces.
     </div>
 
     <script>
-        // You can add more JavaScript here for interactions if needed.
-        // For instance, to place the model on a detected surface in AR:
-        // This usually involves listening to `ar-hit-test-result` events
-        // or creating a more elaborate AR setup.
-        // A-Frame's default WebXR handling will often provide an "Enter AR" button automatically.
         const scene = document.querySelector('a-scene');
+        const instructions = document.getElementById('instructions');
 
+        // Listen for when the user enters AR/VR mode
         scene.addEventListener('enter-vr', function() {
-            // Hide instructions when VR/AR is entered
-            document.getElementById('instructions').style.display = 'none';
-            console.log("Entered VR/AR mode");
+            // Hide instructions when in immersive mode
+            instructions.style.display = 'none';
+            console.log("Entered AR/VR mode");
         });
 
+        // Listen for when the user exits AR/VR mode
         scene.addEventListener('exit-vr', function() {
-            // Show instructions when VR/AR is exited
-            document.getElementById('instructions').style.display = 'block';
-            console.log("Exited VR/AR mode");
+            // Show instructions again when exiting immersive mode
+            instructions.style.display = 'block';
+            console.log("Exited AR/VR mode");
         });
 
-        // A-Frame tries to automatically give you an "Enter AR" button if WebXR AR is supported.
-        // No explicit AR.js setup is needed for basic WebXR AR in A-Frame 1.x.
+        // You can add more advanced AR placement logic here if needed.
+        // A-Frame's WebXR integration usually provides a good default experience
+        // where the AR button appears, and the user can tap to place the model.
     </script>
 </body>
 </html>
