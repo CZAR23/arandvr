@@ -1,74 +1,81 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>AR/VR LEGO Model</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      gap: 20px;
-      background: #f0f0f0;
-    }
-    button {
-      padding: 12px 24px;
-      font-size: 18px;
-      border: none;
-      border-radius: 10px;
-      background-color: #007aff;
-      color: white;
-    }
-    .hidden { display: none; }
-    model-viewer, a-scene {
-      width: 100%;
-      height: 100%;
-    }
-  </style>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>My GitHub Pages AR/VR Model</title>
+    <meta name="description" content="An A-Frame AR/VR model viewer hosted on GitHub Pages.">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1, maximum-scale=1">
+
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+    <style>
+        body { margin: 0; overflow: hidden; }
+        /* Optional: Basic styling for an instruction overlay */
+        #instructions {
+            position: fixed;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            font-family: sans-serif;
+            z-index: 100;
+        }
+    </style>
 </head>
 <body>
+    <a-scene embedded vr-mode-ui="enabled: true" renderer="antialias: true; toneMapping:ACESFilmic; colorManagement: true;">
 
-  <button onclick="showAR()">Launch AR</button>
-  <button onclick="showVR()">Launch VR</button>
+        <a-assets>
+            <a-asset-item id="myModel" src="Inclinometer.glb"></a-asset-item>
+            </a-assets>
 
-  <!-- AR model viewer -->
-  <model-viewer id="arView" class="hidden"
-    src="Inclinometer.glb"
-    ios-src="model.usdz"
-    ar
-    ar-modes="scene-viewer quick-look"
-    camera-controls
-    environment-image="neutral"
-    poster="poster.png"
-    alt="LEGO Model">
-  </model-viewer>
+        <a-entity
+            gltf-model="#myModel"
+            position="0 1.6 -3"  scale="1 1 1"       rotation="0 0 0">
+        </a-entity>
 
-  <!-- VR scene -->
-  <a-scene id="vrScene" class="hidden">
-    <a-assets>
-      <a-asset-item id="legoModel" src="model.glb"></a-asset-item>
-    </a-assets>
-    <a-entity gltf-model="#legoModel" position="0 1.6 -2"></a-entity>
-    <a-sky color="#ECECEC"></a-sky>
-  </a-scene>
+        <a-camera position="0 1.6 0"> <a-cursor></a-cursor> </a-camera>
 
-  <script>
-    function showAR() {
-      document.getElementById("vrScene").classList.add("hidden");
-      document.getElementById("arView").classList.remove("hidden");
-    }
-    function showVR() {
-      document.getElementById("arView").classList.add("hidden");
-      document.getElementById("vrScene").classList.remove("hidden");
-    }
-  </script>
+        <a-light type="ambient" color="#BBB"></a-light>
+        <a-light type="directional" position="1 1 1" intensity="0.5"></a-light>
+        <a-light type="directional" position="-1 1 -1" intensity="0.5"></a-light>
 
+        <a-plane position="0 0 -4" rotation="-90 0 0" width="10" height="10" color="#7BC8A4"></a-plane>
+        <a-sky color="#ECECEC"></a-sky>
+
+        </a-scene>
+
+    <div id="instructions">
+        Tap the VR icon to enter VR mode. On AR-compatible devices, tap the AR button.
+        <br>
+        Use your phone's motion to look around.
+    </div>
+
+    <script>
+        // You can add more JavaScript here for interactions if needed.
+        // For instance, to place the model on a detected surface in AR:
+        // This usually involves listening to `ar-hit-test-result` events
+        // or creating a more elaborate AR setup.
+        // A-Frame's default WebXR handling will often provide an "Enter AR" button automatically.
+        const scene = document.querySelector('a-scene');
+
+        scene.addEventListener('enter-vr', function() {
+            // Hide instructions when VR/AR is entered
+            document.getElementById('instructions').style.display = 'none';
+            console.log("Entered VR/AR mode");
+        });
+
+        scene.addEventListener('exit-vr', function() {
+            // Show instructions when VR/AR is exited
+            document.getElementById('instructions').style.display = 'block';
+            console.log("Exited VR/AR mode");
+        });
+
+        // A-Frame tries to automatically give you an "Enter AR" button if WebXR AR is supported.
+        // No explicit AR.js setup is needed for basic WebXR AR in A-Frame 1.x.
+    </script>
 </body>
 </html>
