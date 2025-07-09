@@ -1,28 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Cross-Platform AR Model</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-    <style>
-      body { margin: 0; background: #f0f0f0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
-      model-viewer { width: 90%; height: 90%; }
-    </style>
-  </head>
-  <body>
+<head>
+  <meta charset="UTF-8" />
+  <title>AR/VR LEGO Model</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      gap: 20px;
+      background: #f0f0f0;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      background-color: #007aff;
+      color: white;
+    }
+    .hidden { display: none; }
+    model-viewer, a-scene {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
 
-    <model-viewer
-      src="Inclinometer.glb"          <!-- your GLB file for Android/desktop -->
-      ios-src="model.usdz"     <!-- your USDZ file for iOS -->
-      ar
-      ar-modes="scene-viewer quick-look"
-      camera-controls
-      environment-image="neutral"
-      poster="poster.png"      <!-- optional image before model loads -->
-      alt="3D Model"
-    >
-    </model-viewer>
+  <button onclick="showAR()">Launch AR</button>
+  <button onclick="showVR()">Launch VR</button>
 
-  </body>
+  <!-- AR model viewer -->
+  <model-viewer id="arView" class="hidden"
+    src="Inclinometer.glb"
+    ios-src="model.usdz"
+    ar
+    ar-modes="scene-viewer quick-look"
+    camera-controls
+    environment-image="neutral"
+    poster="poster.png"
+    alt="LEGO Model">
+  </model-viewer>
+
+  <!-- VR scene -->
+  <a-scene id="vrScene" class="hidden">
+    <a-assets>
+      <a-asset-item id="legoModel" src="model.glb"></a-asset-item>
+    </a-assets>
+    <a-entity gltf-model="#legoModel" position="0 1.6 -2"></a-entity>
+    <a-sky color="#ECECEC"></a-sky>
+  </a-scene>
+
+  <script>
+    function showAR() {
+      document.getElementById("vrScene").classList.add("hidden");
+      document.getElementById("arView").classList.remove("hidden");
+    }
+    function showVR() {
+      document.getElementById("arView").classList.add("hidden");
+      document.getElementById("vrScene").classList.remove("hidden");
+    }
+  </script>
+
+</body>
 </html>
